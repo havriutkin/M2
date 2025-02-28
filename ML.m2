@@ -18,22 +18,24 @@ torch = import "torch"
 np = import "numpy"
 
 loadModel = (modelPath) -> (
-    	model = torch@@load(toString modelPath)
-	model@@eval()
-	return model
-    );
+    model = torch@@load(toString modelPath);
+    model@@eval();
+    return model;
+);
 
-runModel = (model, inputList) -> (
-    	inputArray = np@@array(toPython inputList)
-	inputTensor = torch@@tensor(inputArray, torch@@float)
-	getattr(torch, "set_grad_enabled")(toPython false)
-	output = model(inputTensor) -- todo: figure out how this call works in python interface
-	getattr(torch, "set_grad_enabled")(toPython true)
-	
-	return output
-    );
-
-
+runModel = (modelPath, inputList) -> (
+    command = "python3 forward_model.py --model_path " | modelPath | " --input " | inputList;
+    result = run command;
+    return result;
+);
 
 end--
 restart;
+
+needsPackage "ML"
+
+myPath = "simple_sum_model.pt";
+myInput = "1,2,3,4";
+myRes = runModel(myPath, myInput);
+print myRes;
+
